@@ -1,0 +1,93 @@
+#!/bin/bash
+
+set -eu
+
+IMAGE_ID=$1
+DIST=$2
+PLATFORM=${3:-amd64}
+function desc() {
+    echo "================================"
+    echo -n "TEST: "
+    echo "$@"
+    echo "================================"
+}
+
+function test() {
+    test_extra_args '' "$@"
+}
+
+bind_mounts=( )
+docker_platform_args=( )
+if [[ "$PLATFORM" == "arm64" ]]; then
+    if [[ "$(uname -m)" == *arm* || "$(uname -m)" == *aarch64* ]]; then
+        echo "Running in arm host. QEMU is not needed"
+    else
+        echo "Setting up qemu static"
+        for qemu_static_file in /usr/bin/qemu-*-static; do
+            bind_mounts+=( -v="$qemu_static_file:$qemu_static_file" )
+        done
+        docker_platform_args+=( --platform "linux/arm64" )
+    fi
+fi
+
+function test_extra_args() {
+    local extra_args=$1
+    shift
+    docker run "${docker_platform_args[@]}" --rm "${bind_mounts[@]}" $extra_args -e DEBIAN_FRONTEND=noninteractive "$IMAGE_ID" "$@"
+    echo ""
+    echo TEST: OK
+    echo ""
+}
+
+desc "Checking that apt is installed"
+test dpkg -l apt
+
+desc "Arch matches"
+if [[ "$PLATFORM" == "amd64" ]]; then
+    test bash -c 'echo "$(uname -m)" && [[ "$(uname -m)" == *x86_64* ]]'
+elif [[ "$PLATFORM" == "arm64" ]]; then
+    test bash -c 'echo "$(uname -m)" && [[ "$(uname -m)" == *arm* || "$(uname -m)" == *aarch64* ]]'
+else
+    echo Unknown platform $PLATFORM >&2
+    exit 1
+fi
+desc "Checking that a package can be installed with apt"
+test bash -c 'apt-get update && apt-get -y install less && less --help >/dev/null'
+
+desc "Checking that a package can be installed with install_packages and that it removes cache dirs"
+test bash -c 'install_packages less  && less --help >/dev/null && [ ! -e /var/cache/apt/archives ] && [ ! -e /var/lib/apt/lists ]'
+
+desc "Checking that the debootstrap dir wasn't left in the image"
+test bash -c '[ ! -e /debootstrap ]'
+
+desc "Check that all base packages are correctly installed, including dependencies"
+# Ask apt to install all packages that are already installed, has the effect of checking the
+# dependencies are correctly available
+test bash -c 'apt-get update && (dpkg-query -W -f \${Package} | while read pkg; do apt-get install $pkg; done)'
+
+desc "Check that install_packages doesn't loop forever on failures"
+# This won't install and will fail. The key is that the retry loop will stop after a few iterations.
+# We check that we didn't install the package afterwards, just in case a package gets added with that name.
+# We wrap the whole thing in a timeout so that it doesn't loop forever. It's not ideal to have a timeout as there may be spurious failures if the network is slow.
+test bash -c 'timeout 360 bash -c "(install_packages thispackagebetternotexist || true) && ! dpkg -l thispackagebetternotexist"'
+
+# See https://github.com/bitnami/minideb/issues/17
+desc "Checking that the terminfo is valid when running with -t (#17)"
+echo "" | test_extra_args '-t' bash -c 'install_packages procps && top -d1 -n1 -b'
+
+MYSQL_PACKAGE=default-mysql-server
+
+# See https://github.com/bitnami/minideb/issues/16
+desc "Check that we can install mysql-server (#16)"
+test install_packages $MYSQL_PACKAGE
+
+function shadow_check() {
+    local path=$1
+    test bash -c "(! cut -d: -f3 < $path | grep -v 17885 >/dev/null) || (cat $path && false)"
+}
+
+desc "Check that all users have a fixed day as the last password change date in /etc/shadow"
+shadow_check /etc/shadow
+
+desc "Check that all users have a fixed day as the last password change date in /etc/shadow-"
+shadow_check /etc/shadow-

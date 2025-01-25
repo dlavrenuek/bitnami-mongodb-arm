@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+DISTS="bullseye
+bookworm
+trixie
+"
+LATEST=bookworm
+BASENAME=bitnami/minideb
+
+if [ -n "${DOCKER_PASSWORD:-}" ]; then
+    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+fi
+
+ENABLE_DOCKER_CONTENT_TRUST=0
+if [ -n "${DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE:-}" ] && [ -n "${DOCKER_CONTENT_TRUST_REPOSITORY_KEY:-}" ]; then
+    tmpdir=$(mktemp -d)
+    (cd "${tmpdir}" && bash -c 'echo -n "${DOCKER_CONTENT_TRUST_REPOSITORY_KEY}" | base64 -d > key')
+    chmod 400 "${tmpdir}/key"
+    docker trust key load "${tmpdir}/key"
+    rm -rf "${tmpdir}"
+    export ENABLE_DOCKER_CONTENT_TRUST=1
+fi
+
+push() {
+    local dist="$1"
+    DOCKER_CONTENT_TRUST=${ENABLE_DOCKER_CONTENT_TRUST} docker push "${BASENAME}:${dist}"
+}
+
+for DIST in $DISTS; do
+    push "$DIST"
+done
+
+docker tag "${BASENAME}:${LATEST}" "${BASENAME}:latest"
+
+push latest
+
+# Create and merge a PR to update minideb-extras
+CIRCLE_CI_FUNCTIONS_URL=${CIRCLE_CI_FUNCTIONS_URL:-https://raw.githubusercontent.com/bitnami/test-infra/master/circle/functions}
+# sc can't follow source as it is a remote file
+# shellcheck disable=SC1090
+source <(curl -sSL "$CIRCLE_CI_FUNCTIONS_URL")
+for DIST in $DISTS; do
+    # Use '.RepoDigests 0' for getting Dockerhub repo digest as it was the first pushed
+    DIST_REPO_DIGEST=$(docker image inspect --format '{{index .RepoDigests 0}}' "${BASENAME}:${DIST}")
+    update_minideb_derived "https://github.com/bitnami/minideb-runtimes" "$DIST" "$DIST_REPO_DIGEST"
+done

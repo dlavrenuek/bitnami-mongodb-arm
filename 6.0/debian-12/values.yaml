@@ -4,7 +4,7 @@ global:
     allowInsecureImages: true
 image:
   registry: docker.io
-  repository: library/bitnami-mongodb
-  tag: "6.0.13-local"
+  repository: dlavrenuek/bitnami-mongodb-arm
+  tag: "6.0.13"
   digest: ""
   pullPolicy: IfNotPresent

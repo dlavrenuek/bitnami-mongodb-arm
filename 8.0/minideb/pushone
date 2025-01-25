@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+DIST=${1:?Specify the distrubution name}
+PLATFORM=${2:-amd64}
+
+BASENAME=bitnami/minideb
+
+if [ -n "${DOCKER_PASSWORD:-}" ]; then
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+fi
+
+ENABLE_DOCKER_CONTENT_TRUST=0
+if [ -n "${DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE:-}" ] && [ -n "${DOCKER_CONTENT_TRUST_REPOSITORY_KEY:-}" ]; then
+    tmpdir=$(mktemp -d)
+    (cd "${tmpdir}" && bash -c 'echo -n "${DOCKER_CONTENT_TRUST_REPOSITORY_KEY}" | base64 -d > key')
+    chmod 400 "${tmpdir}/key"
+    docker trust key load "${tmpdir}/key"
+    rm -rf "${tmpdir}"
+    export ENABLE_DOCKER_CONTENT_TRUST=1
+fi
+
+push() {
+    local dist="$1"
+    DOCKER_CONTENT_TRUST=${ENABLE_DOCKER_CONTENT_TRUST} docker push "${BASENAME}:${dist}"
+}
+
+push "$DIST-${PLATFORM}"

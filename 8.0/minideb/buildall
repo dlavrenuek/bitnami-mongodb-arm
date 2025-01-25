@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Build a minideb image for each supported dist
+
+set -e
+set -u
+set -o pipefail
+
+arch=${1:-"amd64 arm64"}
+
+dist="bullseye
+bookworm
+trixie
+"
+for a in $arch; do
+  for i in $dist; do
+    ./buildone "$i" "$a"
+  done
+done
+
