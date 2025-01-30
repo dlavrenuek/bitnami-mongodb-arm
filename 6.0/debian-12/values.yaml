@@ -7,4 +7,3 @@ image:
   repository: dlavrenuek/bitnami-mongodb-arm
   tag: "6.0.13"
   digest: ""
-  pullPolicy: IfNotPresent

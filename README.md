@@ -13,6 +13,16 @@ This repository contains build files for following mongodb versions:
 
 ## How-to build and use the images
 
+### Use published images
+
+The images built from this repository are published to [Docker Hub](https://hub.docker.com/r/dlavrenuek/bitnami-mongodb-arm).
+
+```
+dlavrenuek/bitnami-mongodb-arm:6.0.13
+```
+
+### Build images from source
+
 To build a docker image, first  go to the image directory you want to use in the terminal, f.e:
 
 ```shell
@@ -30,25 +40,29 @@ You can now use the image `bitnami-mongodb:6.0.13-local` locally.
 
 ### Usage via docker compose
 
-Example usage with [mongodb 6.0 docker-compose.yaml](6.0/debian-12/docker-compose.yml):
+Example usage with [mongodb 6.0 docker-compose.yaml](6.0/debian-12/docker-compose.yml). The dockerfile is configured
+to build the image from source locally.
 
 ```shell
+cd 6.0/debian-12
 docker compose up
 ```
 
 ### Usage with official helm charts
 
-Then running mongodb via helm charts, in most setups your k8s environment will not have access to the local image
-registry, you will need to upload the image to your registry first. For [minikube](https://minikube.sigs.k8s.io/docs/)
+The provided image can be used with the official bitnami helm charts. You can use the example [values.yaml](6.0/debian-12/values.yaml)
+as following:
+
+```shell
+cd 6.0/debian-12
+helm install mongo -f values.yaml oci://registry-1.docker.io/bitnamicharts/mongodb
+```
+
+If you want to use the image build from source you will need to upload the image to your registry first. For [minikube](https://minikube.sigs.k8s.io/docs/)
 you can use:
 
 ```shell
 minikube image load bitnami-mongodb:6.0.13-local
 ```
 
-This will make the image available as `docker.io/library/bitnami-mongodb:6.0.13-local`. You can now start the mongodb
-container with the provided example [values.yaml](6.0/debian-12/values.yaml):
-
-```shell
- helm install mongo -f values.yaml oci://registry-1.docker.io/bitnamicharts/mongodb
-```
+This will make the image available as `docker.io/library/bitnami-mongodb:6.0.13-local`.
