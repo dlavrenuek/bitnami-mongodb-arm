@@ -58,7 +58,8 @@ if [[ ! -f .kvm-images/amd64/buster-server-cloudimg-amd64.qcow2 && "$PLATFORM" =
 fi
 
 if [[ ! -f .kvm-images/arm64/buster-server-cloudimg-arm64.qcow2 && "$PLATFORM" == "arm64" ]]; then
-  curl -SL https://cdimage.debian.org/cdimage/openstack/current/debian-10-openstack-arm64.qcow2 > .kvm-images/arm64/buster-server-cloudimg-arm64.qcow2
+  # CHANGE: fix image download url
+  curl -SL https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-arm64.qcow2 > .kvm-images/arm64/buster-server-cloudimg-arm64.qcow2
   curl -SL https://releases.linaro.org/components/kernel/uefi-linaro/latest/release/qemu64/QEMU_EFI.fd > .kvm-images/arm64/QEMU_EFI.fd
 fi
 
@@ -68,7 +69,7 @@ TARGET_FILE="build/$DIST/$PLATFORM/image.tar"
 
 mkdir -p "build/$DIST/$PLATFORM"
 
-qemu-img create -f qcow2 -o backing_file="../../../.kvm-images/$PLATFORM/buster-server-cloudimg-$PLATFORM.qcow2" "$IMAGE_FILE"
+qemu-img create -f qcow2 -F qcow2 -o backing_file="../../../.kvm-images/$PLATFORM/buster-server-cloudimg-$PLATFORM.qcow2" "$IMAGE_FILE"
 qemu-img resize "$IMAGE_FILE" 8G
 
 USER_DATA='

@@ -20,6 +20,7 @@ cp -a /usr/share/debootstrap/* "$DEBOOTSTRAP_DIR"
 cp -a /usr/share/keyrings/debian-archive-keyring.gpg "$DEBOOTSTRAP_DIR"
 cp -a "${ROOT}/debootstrap/"* "${DEBOOTSTRAP_DIR}/scripts"
 
+
 KEYRING=$DEBOOTSTRAP_DIR/debian-archive-keyring.gpg
 
 use_qemu_static() {
@@ -45,7 +46,7 @@ fi
 
 rootfsDir=$(mktemp -d)
 echo "Building base in $rootfsDir"
-DEBOOTSTRAP_DIR="$DEBOOTSTRAP_DIR" debootstrap "${debootstrap_arch_args[@]}"  --keyring "$KEYRING" --variant container --foreign "${DIST}" "$rootfsDir"
+DEBOOTSTRAP_DIR="$DEBOOTSTRAP_DIR" debootstrap "${debootstrap_arch_args[@]}" --keyring "$KEYRING" --variant container --foreign "${DIST}" "$rootfsDir"
 
 # get path to "chroot" in our current PATH
 chrootPath="$(type -P chroot)"
@@ -78,8 +79,8 @@ sec_repo_url_2="http://security.debian.org/debian-security"
 echo -e "deb ${repo_url} $DIST main" > "$rootfsDir/etc/apt/sources.list"
 if [ "$DIST" == "trixie" ]; then
     echo "deb ${repo_url} $DIST-updates main" >> "$rootfsDir/etc/apt/sources.list"
-    echo "deb ${sec_repo_url_1} $DIST-security main" >> "$rootfsDir/etc/apt/sources.list"
-elif [ "$DIST" == "bullseye" ]; then
+    echo "deb ${sec_repo_url_2} $DIST-security main" >> "$rootfsDir/etc/apt/sources.list"
+elif [ "$DIST" == "bookworm" ]; then
     echo "deb ${repo_url} $DIST-updates main" >> "$rootfsDir/etc/apt/sources.list"
     echo "deb ${sec_repo_url_1} $DIST-security main" >> "$rootfsDir/etc/apt/sources.list"
 elif [ "$DIST" == "bullseye" ]; then
