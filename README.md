@@ -10,6 +10,7 @@ hardware and should not be used on production.
 
 This repository contains build files for following mongodb versions:
 - [8.0.4](8.0) based on an own custom bitnami/minideb:trixie image
+- [7.0.15](7.0)
 - [6.0.13](6.0)
 
 ## How-to build and use the images
@@ -20,6 +21,7 @@ The images built from this repository are published to [Docker Hub](https://hub.
 
 ```
 dlavrenuek/bitnami-mongodb-arm:8.0.4
+dlavrenuek/bitnami-mongodb-arm:7.0.15
 dlavrenuek/bitnami-mongodb-arm:6.0.13
 ```
 

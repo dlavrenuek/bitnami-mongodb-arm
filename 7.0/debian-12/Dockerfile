@@ -1,23 +1,22 @@
 # Copyright Broadcom, Inc. All Rights Reserved.
 # SPDX-License-Identifier: APACHE-2.0
 
-# CHANGE: use minideb:trixie - for now custom build untill officially supported by bitnami
-FROM docker.io/bitnami/minideb:trixie
+FROM docker.io/bitnami/minideb:bookworm
 
 ARG DOWNLOADS_URL="downloads.bitnami.com/files/stacksmith"
 ARG TARGETARCH
 
 LABEL com.vmware.cp.artifact.flavor="sha256:c50c90cfd9d12b445b011e6ad529f1ad3daea45c26d20b00732fae3cd71f6a83" \
       org.opencontainers.image.base.name="docker.io/bitnami/minideb:bookworm" \
-      org.opencontainers.image.created="2024-12-11T17:36:50Z" \
+      org.opencontainers.image.created="2024-12-09T22:32:34Z" \
       org.opencontainers.image.description="Original Application packaged by Broadcom, Inc., modified by dlavrenuek" \
       org.opencontainers.image.documentation="https://github.com/dlavrenuek/bitnami-mongodb-arm/blob/main/README.md" \
       org.opencontainers.image.licenses="Apache-2.0" \
-      org.opencontainers.image.ref.name="8.0.4-debian-13" \
+      org.opencontainers.image.ref.name="7.0.15-debian-12-r2" \
       org.opencontainers.image.source="https://github.com/dlavrenuek/bitnami-mongodb-arm" \
       org.opencontainers.image.title="mongodb" \
       org.opencontainers.image.vendor="Broadcom, Inc." \
-      org.opencontainers.image.version="8.0.4"
+      org.opencontainers.image.version="7.0.15"
 
 ENV HOME="/" \
     OS_ARCH="${TARGETARCH:-amd64}" \
@@ -27,18 +26,14 @@ ENV HOME="/" \
 COPY prebuildfs /
 SHELL ["/bin/bash", "-o", "errexit", "-o", "nounset", "-o", "pipefail", "-c"]
 # Install required system packages and dependencies
-# CHANGE: "mongodb-shell-2.3.4-0-linux-${OS_ARCH}-debian-12" is removed from list because it is not available as arm64
-# CHANGE: "mongodb-8.0.4-0-linux-${OS_ARCH}-debian-12" removed because it will be built as part of mongodb image
-# CHANGE: update/change libraries
-#  libldap-2.5-0 -> libldap2
-#  libnettle8 -> libnettle8t64
-#  libunistring2 -> libunistring5
-RUN install_packages ca-certificates curl libbrotli1 libcom-err2 libcurl4 libffi8 libgcc-s1 libgmp10 libgnutls30 libgssapi-krb5-2 libhogweed6 libidn2-0 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2 libnettle8t64 libnghttp2-14 libp11-kit0 libpsl5 librtmp1 libsasl2-2 libssh2-1 libssl3 libtasn1-6 libunistring5 libzstd1 numactl procps zlib1g
+# CHANGE: "mongodb-6.0.13-4-linux-${OS_ARCH}-debian-11" is removed from list because it is not available as arm64
+# CHANGE: "mongodb-shell-2.3.4-0-linux-${OS_ARCH}-debian-12" is removed due to being installed together with other mongodb binaries
+RUN install_packages ca-certificates curl libbrotli1 libcom-err2 libcurl4 libffi8 libgcc-s1 libgmp10 libgnutls30 libgssapi-krb5-2 libhogweed6 libidn2-0 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap-2.5-0 libnettle8 libnghttp2-14 libp11-kit0 libpsl5 librtmp1 libsasl2-2 libssh2-1 libssl3 libtasn1-6 libunistring2 libzstd1 numactl procps zlib1g
 RUN mkdir -p /tmp/bitnami/pkg/cache/ ; cd /tmp/bitnami/pkg/cache/ ; \
     COMPONENTS=( \
-      "yq-4.45.1-2-linux-${OS_ARCH}-debian-12" \
-      "wait-for-port-1.0.8-10-linux-${OS_ARCH}-debian-12" \
-      "render-template-1.0.7-10-linux-${OS_ARCH}-debian-12" \
+      "yq-4.44.6-0-linux-${OS_ARCH}-debian-12" \
+      "wait-for-port-1.0.8-8-linux-${OS_ARCH}-debian-12" \
+      "render-template-1.0.7-8-linux-${OS_ARCH}-debian-12" \
     ) ; \
     for COMPONENT in "${COMPONENTS[@]}"; do \
       if [ ! -f "${COMPONENT}.tar.gz" ]; then \
@@ -53,10 +48,7 @@ RUN apt-get autoremove --purge -y curl && \
     apt-get update && apt-get upgrade -y && \
     apt-get clean && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-
-# CHANGE: install mongodb as in
-
-
+# CHANGE: Install mongodb based on https://github.com/docker-library/mongo/blob/master/7.0/Dockerfile
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
 ENV GOSU_VERSION 1.17
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
@@ -93,10 +85,10 @@ RUN set -eux; \
 	\
 # download/install MongoDB PGP keys
 	export GNUPGHOME="$(mktemp -d)"; \
-	wget -O KEYS 'https://pgp.mongodb.com/server-8.0.asc'; \
+	wget -O KEYS 'https://pgp.mongodb.com/server-7.0.asc'; \
 	gpg --batch --import KEYS; \
 	mkdir -p /etc/apt/keyrings; \
-	gpg --batch --export --armor '4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05' > /etc/apt/keyrings/mongodb.asc; \
+	gpg --batch --export --armor 'E58830201F7DD82CD808AA84160D26BB1785BA38' > /etc/apt/keyrings/mongodb.asc; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" KEYS; \
 	\
@@ -119,13 +111,14 @@ ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR 8.0
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+ENV MONGO_MAJOR 7.0
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu jammy/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-# https://docs.mongodb.org/master/release-notes/8.0/
-ENV MONGO_VERSION 8.0.4
-# 11/27/2024, https://github.com/mongodb/mongo/tree/bc35ab4305d9920d9d0491c1c9ef9b72383d31f9
+# https://docs.mongodb.org/master/release-notes/7.0/
+ENV MONGO_VERSION 7.0.15
+# 02/19/2025, https://github.com/mongodb/mongo/tree/f099987179b0e9919aa2fcba25afe48f35e53ae9
 
+# CHANGE: remove ${MONGO_PACKAGE}-shell=$MONGO_VERSION as it is installed in
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
 	&& export DEBIAN_FRONTEND=noninteractive \
@@ -152,13 +145,12 @@ RUN mkdir -p /opt/bitnami/mongodb/bin \
 
 
 # continue with bitnami build
-
 RUN chmod g+rwX /opt/bitnami
 RUN find / -perm /6000 -type f -exec chmod a-s {} \; || true
 
 COPY rootfs /
 RUN /opt/bitnami/scripts/mongodb/postunpack.sh
-ENV APP_VERSION="8.0.4" \
+ENV APP_VERSION="7.0.15" \
     BITNAMI_APP_NAME="mongodb" \
     PATH="/opt/bitnami/common/bin:/opt/bitnami/mongodb/bin:$PATH"
 

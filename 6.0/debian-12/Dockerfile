@@ -7,11 +7,12 @@ FROM docker.io/bitnami/minideb:bookworm
 ARG TARGETARCH
 
 LABEL com.vmware.cp.artifact.flavor="sha256:1e1b4657a77f0d47e9220f0c37b9bf7802581b93214fff7d1bd2364c8bf22e8e" \
-      org.opencontainers.image.base.name="docker.io/bitnami/minideb:bullseye" \
+      org.opencontainers.image.base.name="docker.io/bitnami/minideb:bookworm" \
       org.opencontainers.image.created="2024-02-19T15:15:11Z" \
-      org.opencontainers.image.description="Application packaged by VMware, Inc" \
+      org.opencontainers.image.description="Original Application packaged by VMware, Inc., modified by dlavrenuek" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.ref.name="6.0.13-debian-11-r21" \
+      org.opencontainers.image.source="https://github.com/dlavrenuek/bitnami-mongodb-arm" \
       org.opencontainers.image.title="mongodb" \
       org.opencontainers.image.vendor="VMware, Inc." \
       org.opencontainers.image.version="6.0.13"

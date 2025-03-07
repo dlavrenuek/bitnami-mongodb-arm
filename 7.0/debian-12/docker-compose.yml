@@ -3,7 +3,7 @@
 
 services:
   mongodb:
-    image: docker.io/dlavrenuek/bitnami-mongodb-arm:8.0.4
+    image: docker.io/dlavrenuek/bitnami-mongodb-arm:7.0.15
     build:
       dockerfile: Dockerfile
     ports:
