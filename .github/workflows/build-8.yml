@@ -5,10 +5,10 @@ on:
     branches:
       - main
     paths:
-      - 8.0/*
+      - '8.0/**'
   pull_request:
     paths:
-      - 8.0/*
+      - '8.0/**'
 
 env:
   TAGS: dlavrenuek/bitnami-mongodb-arm:8.0,dlavrenuek/bitnami-mongodb-arm:8.0.4
