@@ -17,4 +17,4 @@ make build
 
 This will create and load following images to the local docker repository:
 
-- `dlavrenuek/bitnami-mongodb-arm:8.0.4`
+- `dlavrenuek/bitnami-mongodb-arm:8.0.9`

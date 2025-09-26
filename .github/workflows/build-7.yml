@@ -5,15 +5,15 @@ on:
     branches:
       - main
     paths:
-      - '8.0/**'
-      - '.github/workflows/build-8.yml'
+      - '7.0/**'
+      - '.github/workflows/build-7.yml'
   pull_request:
     paths:
-      - '8.0/**'
-      - '.github/workflows/build-8.yml'
+      - '7.0/**'
+      - '.github/workflows/build-7.yml'
 
 env:
-  TAGS: dlavrenuek/bitnami-mongodb-arm:8.0,dlavrenuek/bitnami-mongodb-arm:8.0.9
+  TAGS: dlavrenuek/bitnami-mongodb-arm:7.0,dlavrenuek/bitnami-mongodb-arm:7.0.15
 
 jobs:
   build-push:
@@ -39,4 +39,4 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.TAGS }}
-          context: ./8.0/debian-13
+          context: ./7.0/debian-12

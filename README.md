@@ -9,7 +9,7 @@ neither by bitnami nor by mongodb. The resulting images are meant to be only use
 hardware and should not be used on production.
 
 This repository contains build files for following mongodb versions:
-- [8.0.4](8.0) based on an own custom bitnami/minideb:trixie image
+- [8.0.9](8.0) based on an own custom bitnami/minideb:trixie image
 - [7.0.15](7.0)
 - [6.0.13](6.0)
 
@@ -20,8 +20,12 @@ This repository contains build files for following mongodb versions:
 The images built from this repository are published to [Docker Hub](https://hub.docker.com/r/dlavrenuek/bitnami-mongodb-arm).
 
 ```
+dlavrenuek/bitnami-mongodb-arm:8.0
+dlavrenuek/bitnami-mongodb-arm:8.0.9
 dlavrenuek/bitnami-mongodb-arm:8.0.4
+dlavrenuek/bitnami-mongodb-arm:7.0
 dlavrenuek/bitnami-mongodb-arm:7.0.15
+dlavrenuek/bitnami-mongodb-arm:6.0
 dlavrenuek/bitnami-mongodb-arm:6.0.13
 ```
 
@@ -30,25 +34,25 @@ dlavrenuek/bitnami-mongodb-arm:6.0.13
 To build a docker image, first  go to the image directory you want to use in the terminal, f.e:
 
 ```shell
-cd 6.0/debian-12
+cd 8.0/debian-13
 ```
 
 Then run following docker build command to build and tag an image. The following example will produce an image with the
-`bitnami-mongodb:6.0.13-local` tag:
+`bitnami-mongodb:8.0.9` tag:
 
 ```shell
-docker build -t bitnami-mongodb:6.0.13-local .
+docker build -t bitnami-mongodb:8.0.9 .
 ```
 
-You can now use the image `bitnami-mongodb:6.0.13-local` locally.
+You can now use the image `bitnami-mongodb:8.0.9` locally.
 
 ### Usage via docker compose
 
-Example usage with [mongodb 6.0 docker-compose.yaml](6.0/debian-12/docker-compose.yml). The dockerfile is configured
+Example usage with [mongodb 8.0 docker-compose.yaml](8.0/debian-13/docker-compose.yml). The dockerfile is configured
 to build the image from source locally.
 
 ```shell
-cd 6.0/debian-12
+cd 8.0/debian-13
 docker compose up
 ```
 
@@ -58,7 +62,7 @@ The provided image can be used with the official bitnami helm charts. You can us
 as following:
 
 ```shell
-cd 6.0/debian-12
+cd 8.0/debian-13
 helm install mongo -f values.yaml oci://registry-1.docker.io/bitnamicharts/mongodb
 ```
 
@@ -66,7 +70,7 @@ If you want to use the image build from source you will need to upload the image
 you can use:
 
 ```shell
-minikube image load bitnami-mongodb:6.0.13-local
+minikube image load bitnami-mongodb:8.0.9
 ```
 
-This will make the image available as `docker.io/library/bitnami-mongodb:6.0.13-local`.
+This will make the image available as `docker.io/library/bitnami-mongodb:8.0.9`.

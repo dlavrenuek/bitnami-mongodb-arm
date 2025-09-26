@@ -5,5 +5,5 @@ global:
 image:
   registry: docker.io
   repository: dlavrenuek/bitnami-mongodb-arm
-  tag: "8.0.4"
+  tag: "8.0.9"
   digest: ""
