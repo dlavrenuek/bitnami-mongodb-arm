@@ -6,9 +6,11 @@ on:
       - main
     paths:
       - '8.0/**'
+      - '.github/workflows/build-8.yml'
   pull_request:
     paths:
       - '8.0/**'
+      - '.github/workflows/build-8.yml'
 
 env:
   TAGS: dlavrenuek/bitnami-mongodb-arm:8.0,dlavrenuek/bitnami-mongodb-arm:8.0.4
