@@ -13,7 +13,7 @@ on:
       - '.github/workflows/build-8.yml'
 
 env:
-  TAGS: dlavrenuek/bitnami-mongodb-arm:8.0,dlavrenuek/bitnami-mongodb-arm:8.0.9
+  TAGS: dlavrenuek/bitnami-mongodb-arm:8.0,dlavrenuek/bitnami-mongodb-arm:8.0.9,dlavrenuek/bitnami-mongodb-arm:latest
 
 jobs:
   build-push:

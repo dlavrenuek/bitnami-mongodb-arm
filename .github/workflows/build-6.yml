@@ -1,4 +1,4 @@
-name: Build Mongo 8 Image
+name: Build Mongo 6 Image
 
 on:
   push:
