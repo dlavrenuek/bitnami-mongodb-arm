@@ -9,7 +9,7 @@ neither by bitnami nor by mongodb. The resulting images are meant to be only use
 hardware and should not be used on production.
 
 This repository contains build files for following mongodb versions:
-- [8.0.9](8.0) based on an own custom bitnami/minideb:trixie image
+- [8.0.9](8.0) ~~based on an own custom bitnami/minideb:trixie image~~ now based on official `bitnami/minideb:trixie`
 - [7.0.15](7.0)
 - [6.0.13](6.0)
 
